@@ -1,1 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Aquarium</title>
 
+    <style>
+        /* General Page Appearance */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e6f2f5;
+            text-align: center;
+        }
+
+        /* Aquarium Title Appearance */
+        h1 {
+            color: #164e63;
+        }
+
+        /* Tank */
+        #tank {
+            position: relative;
+            width: 900px;
+            height: 500px;
+            margin: 30px auto;
+            border: 8px solid #164e63;
+            border-radius: 12px;
+            overflow: hidden;
+
+            /* Gradient Across The Tank */
+            background: linear-gradient(
+                to bottom,
+                #38bdf8,
+                #0284c7,
+                #064e7a
+            );
+        }
+
+        /* Individual Fish Appearance And Dimensions */
+        .fish {
+            position: absolute;
+            width: 115px;
+            height: 115px;
+            cursor: pointer;
+            user-select: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Aquarium Title And Instructions -->
+    <h1>My Aquarium</h1>
+    <p>Click On A Fish To Change Its Swimming Speed!</p>
+
+    <!-- Container Where All Fish Will Appear -->
+    <div id="tank"></div>
+
+    <script>
+        // Get The Tank Element From The HTML
+        const tank = document.getElementById("tank");
+
+        // List Of All Possible Fish Images
+        const fishImages = [
+            "fish1.png",
+            "fish2.png",
+            "fish3.png",
+            "fish4.png",
+            "fish5.png"
+        ];
+
+        // Fish Class Controls Individual Fish Behavior
+        class Fish {
+
+            constructor() {
+
+                // Create A New Fish Image Element
+                this.element = document.createElement("img");
+
+                // Apply The Fish CSS Class
+                this.element.className = "fish";
+
+                // Randomly Select One Of The Five Fish Images
+                this.element.src = fishImages[
+                    Math.floor(Math.random() * fishImages.length)
+                ];
+
+                // Generate A Random Starting Horizontal Position
+                // Keeps The Entire Fish Inside The Tank
+                this.x = Math.random() * (tank.clientWidth - 115);
+
+                // Generate A Random Starting Vertical Position
+                // Keeps The Entire Fish Inside The Tank
+                this.y = Math.random() * (tank.clientHeight - 115);
+
+                // Randomly Choose An Initial Direction
+                // 1 Means Right And -1 Means Left
+                this.direction = Math.random() < 0.5 ? -1 : 1;
+
+                // Give Each Fish A Random Normal Swimming Speed
+                this.speed = 1 + Math.random() * 1.5;
+
+                // Save The Original Speed For Later
+                this.normalSpeed = this.speed;
+
+                // Set The Fish's Starting Position
+                this.element.style.left = this.x + "px";
+                this.element.style.top = this.y + "px";
+
+                // Add The Fish To The Tank
+                tank.appendChild(this.element);
+
+                // Listen For Clicks On This Individual Fish
+                this.element.addEventListener("click", () => {
+                    this.changeSpeed();
+                });
+
+                // Start This Fish's Independent Direction Timer
+                this.startDirectionCheck();
+
+                // Begin Continuous Fish Movement
+                this.move();
+            }
+
+            // CONTINUOUS MOVEMENT
+            move() {
+
+                // Update The Fish's Horizontal Position
+                // Direction Determines Which Way It Moves
+                // Speed Determines How Far It Moves Each Frame
+                this.x += this.direction * this.speed;
+
+                // Prevent The Fish From Moving Past The Left Edge
+                if (this.x <= 0) {
+                    this.x = 0;
+                }
+
+                // Prevent The Fish From Moving Past The Right Edge
+                if (this.x >= tank.clientWidth - 115) {
+                    this.x = tank.clientWidth - 115;
+                }
+
+                // Update The Fish's Position On The Screen
+                this.element.style.left = this.x + "px";
+
+                // Repeat The Movement Function Continuously
+                requestAnimationFrame(() => this.move());
+            }
+
+            // RANDOM DIRECTION CHANGES
+            startDirectionCheck() {
+
+                // Generate A Random Delay Between 2 And 8 Seconds
+                let delay = 2000 + Math.random() * 6000;
+
+                // Wait Until The Random Timer Finishes
+                setTimeout(() => {
+
+                    // 50% Chance Of Changing Direction
+                    if (Math.random() < 0.5) {
+
+                        // Reverse The Current Direction
+                        this.direction *= -1;
+                    }
+
+                    // Start Another Independent Direction Check
+                    this.startDirectionCheck();
+
+                }, delay);
+            }
+
+            // CLICKING AND SWIMMING SPEED CHANGES
+            changeSpeed() {
+
+                // Double This Fish's Normal Swimming Speed
+                this.speed = this.normalSpeed * 2;
+
+                // Clear The Previous Speed Timer
+                // Prevents Repeated Clicks From Stacking Speed Changes
+                clearTimeout(this.speedTimeout);
+
+                // Wait 3 Seconds Before Returning To Normal Speed
+                this.speedTimeout = setTimeout(() => {
+
+                    // Restore The Original Swimming Speed
+                    this.speed = this.normalSpeed;
+
+                }, 3000);
+            }
+        }
+
+        // CREATE THE FISH
+        // Array Stores All Seven Fish Objects
+        const fishList = [];
+
+        // Generate Seven Fish When The Page Loads
+        for (let i = 0; i < 7; i++) {
+
+            // Create A New Fish And Add It To The Array
+            fishList.push(new Fish());
+        }
+
+    </script>
+
+</body>
+</html>
